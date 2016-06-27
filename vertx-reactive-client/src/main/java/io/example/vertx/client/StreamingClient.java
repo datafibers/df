@@ -41,12 +41,10 @@ public class StreamingClient extends AbstractVerticle {
 		Runner.runExample(StreamingClient.class);
 	}
 
-
 	public void start() {
 
 		HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions());
 		FileSystem fs = vertx.fileSystem();
-
 		handshake(httpClient, fs);
 
 	}
@@ -54,13 +52,13 @@ public class StreamingClient extends AbstractVerticle {
 	public void handshake(HttpClient hc, FileSystem fs) {
 
 		HttpClientRequest request = hc.put(SERVER_PORT, SERVER_ADDR, "", resp -> {
-			System.out.println("Response:Hand Shake: " + resp.statusCode());
-			System.out.println("Response:Hand Shake: " + resp.statusMessage());
+			System.out.println("Response: Hand Shake Status Code - " + resp.statusCode());
+			System.out.println("Response: Hand Shake Status Message - " + resp.statusMessage());
 			if (resp.statusCode() == RES_SUCCESS) {
- 				System.out.println("Response:Hand Shake: SUCCESSFUL!");
+ 				System.out.println("Response: Hand Shake Status - SUCCESSFUL!");
  				streamfile(hc, fs);
  			}
- 			else System.out.println("Response:Hand Shake: FAILED!");
+ 			else System.out.println("Response: Hand Shake Status - FAILED!");
 		});
 		    request.end(setMetaData(FILE_NAME));
  	}
@@ -68,13 +66,12 @@ public class StreamingClient extends AbstractVerticle {
 	public void streamfile(HttpClient hc, FileSystem fs) {
 
 		HttpClientRequest request = hc.put(SERVER_PORT, SERVER_ADDR, "", resp -> {
-			System.out.println("Response:File Streaming " + resp.statusCode());
-			System.out.println("Response:File Streaming " + resp.statusMessage());
+			System.out.println("Response: File Streaming Status Code - " + resp.statusCode());
+			System.out.println("Response: File Streaming Status Message - " + resp.statusMessage());
 		});
 
 		fs.props(FILE_NAME, ares -> {
 			FileProps props = ares.result();
-			System.out.println("props is " + props);
 			request.headers().set("content-length", String.valueOf(props.size()));
 			fs.open(FILE_NAME, new OpenOptions(), ares2 -> {
 				AsyncFile file = ares2.result();
@@ -92,12 +89,12 @@ public class StreamingClient extends AbstractVerticle {
 		String jsonstring = null;
 		try {
 			BasicFileAttributes attr = Files.readAttributes(Paths.get(finlename), BasicFileAttributes.class);
-			jsonstring = "{\"" + "filelength" + "\":\"" + String.valueOf(attr.size()) + "\"," +
-						 "\"" + "date" + "\":\"" + String.valueOf(attr.creationTime()) + "\"," +
-						 "\"" + "from" + "\":\"" + FILE_NAME + "\"," +
+			jsonstring = "{\"" + "file_length" + "\":\"" + String.valueOf(attr.size()) + "\"," +
+						 "\"" + "creation_date" + "\":\"" + String.valueOf(attr.creationTime()) + "\"," +
+						 "\"" + "file_name" + "\":\"" + FILE_NAME + "\"," +
 						 "\"" + "topic" + "\":\"" + META_TOPIC + "\"," +
 						 "\"" + "mode"+ "\":\"" + TRANS_MODE + "\"}";
-			System.out.println("INFO: metadata string is: " + jsonstring);
+			System.out.println("INFO: Metadata Json String is - " + jsonstring);
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

@@ -34,7 +34,7 @@ public class StreamingServer extends AbstractVerticle {
 	 */
 	@Override
 	  public void start() throws Exception {
-		System.out.println("Server started at localhost:8998 ...");
+		System.out.println("INFO: Server started at - localhost:8998");
 		vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
 	    	
 	    	long byteswritten = 0;
@@ -59,28 +59,24 @@ public class StreamingServer extends AbstractVerticle {
 						String inputString = extraBytes == null ? buffer.toString(): extraBytes + buffer.toString();
 						extraBytes = null;
 						//using string patterns
-						System.out.println("Message received from client: " + inputString);
+						System.out.println("INFO: Message received from client - " + inputString);
 						Matcher m = p.matcher(inputString);
-                        System.out.println("Matcher m: " + m);
 						//set request content-length header
                         MultiMap headers = request.headers();
-                        System.out.println("headers received from client: " + headers);
                         headers.set("content-length", String.valueOf(byteswritten));
 						while (m.find()) {
-                            System.out.println("In While Loop");
 							if(start < 0){
 								if(m.start() > 0)
 									start = m.start();
 							}
 							try{
 								//adding message to Kafka topic
-								//ksp.sendMessages("appA", m.group());
-                                //if (META_TOPIC.equalsIgnoreCase(request.headers().get("topic"))) break;
-                                System.out.println("Message sent to Kafka: " + m.group());
+								ksp.sendMessages("appA", m.group());
+                                System.out.println("INFO: Message sent to Kafka - " + m.group());
 
 							}catch(Exception ex){
 								ex.printStackTrace();
-								System.err.println("Error sending message to Kafka");
+								System.err.println("ERROR: Sending message to Kafka!!");
 							}
 							end = m.start() + m.group().length();
 						}//while
@@ -115,7 +111,6 @@ public class StreamingServer extends AbstractVerticle {
 							ex.printStackTrace();
 						}
 						*///-------ends---jackson parser
-						System.out.println("end of handle: ");
 					}
 
 				});//request.handler
@@ -123,9 +118,9 @@ public class StreamingServer extends AbstractVerticle {
 				request.endHandler(new Handler<Void>() {
 					@Override
 					public void handle(Void event) {
-						System.out.println("...end handler.");
+						System.out.println("INFO: request.endHandler is called");
 						try {
-							request.response().setStatusCode(202).setStatusMessage("bytes written" + byteswritten);
+							request.response().setStatusCode(202).setStatusMessage("bytes written " + byteswritten);
 							request.response().end();
 							extraBytes = null;
 							results = new ArrayList<String>();
