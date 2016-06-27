@@ -1,6 +1,6 @@
-# kappa-streaming
+# Datafibers Kappa Architecture
 
-Kappa Architecture streaming project, that is based on a immutable log appender model. This project provides an implementation of streaming a very large file using vert.x client to a vert.x server. Parsing data on server and sending the records to Kafka Queue.
+Datafibers Kappa Architecture is based on a immutable log appender model. This project provides an implementation of streaming a very large file using vert.x client to a vert.x server. Parsing data on server and sending the records to Kafka Queue.
 
 Then records are read by Kafka queue and processed by Apache Flink framework.
 
@@ -23,6 +23,5 @@ Read [Licence](https://github.com/tuhingupta/kappa-streaming/blob/master/license
 
 ### TODO
 1. Constent streamer
-
-	//{"transaction_date":"2015-12-29","account_number":"201418777876948","transaction_amount":"803.02","last_name":"Willis","id":"405067","first_name":"Billy","email":"bwillis10@spotify.com"}
-	//{"transaction_date":"2015-05-30","account_number":"4905709701528306163","transaction_amount":"224.86","last_name":"Lee","id":"405068","first_name":"Douglas","email":"dleep6@posterous.com"}
+//{"transaction_date":"2015-12-29","account_number":"201418777876948","transaction_amount":"803.02","last_name":"Willis","id":"405067","first_name":"Billy","email":"bwillis10@spotify.com"}
+//{"transaction_date":"2015-05-30","account_number":"4905709701528306163","transaction_amount":"224.86","last_name":"Lee","id":"405068","first_name":"Douglas","email":"dleep6@posterous.com"}
