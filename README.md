@@ -4,6 +4,7 @@
 DataFibers - DF is a Kappa Architecture implementation based on a immutable log appender model.
 
 This project is using following technologies.
+
 * Vertx (Java 8)
 * Kafka (API, Connect, Stream)
 * HDFS API
@@ -28,5 +29,9 @@ It is a maven multi-module project. It contains following modules
 * Query framework
 * Integrate Kanaba and Elastic
 * File ingestion and conversion, flat, xml, csv, mainframe
-
-
+* Data replication across clusters, databases, tables, etc
+* Data policy supports, such as purging/retaining some rows for compliance reasons
+* Automatically register data with Hive
+* Data format interchange
+* Data deduplication and merge
+* Data job management and monitoring
