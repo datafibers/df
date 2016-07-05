@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
   <modules>
       <module>vertx-reactive-server</module>
-      <module>vertx-reactive-client</module>
+      <module>vertx-reactive-agent</module>
       <module>flink-kafka-processor</module>
   </modules>
   

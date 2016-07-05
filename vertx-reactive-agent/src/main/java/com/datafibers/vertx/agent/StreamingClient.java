@@ -1,6 +1,9 @@
-package io.example.vertx.client;
+package com.datafibers.vertx.agent;
 
-import io.example.vertx.util.Runner;
+import com.datafibers.vertx.util.AgentConstant;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.datafibers.vertx.util.MetaDataPOJO;
+import com.datafibers.vertx.util.Runner;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.FileProps;
@@ -17,15 +20,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class StreamingClient extends AbstractVerticle {
 
-
-	static String FILE_NAME = null;
-	static String FILE_TOPIC = null;
-	static String META_TOPIC = "metadata"; //use default value for marking handshake
-	static String TRANS_MODE = null;
-	static String SERVER_ADDR = "localhost";
-	static int SERVER_PORT = 8998;
-	static int RES_SUCCESS = 202;
-
 	public static void main(String[] args) {
 
 		if (null == args[0] || args[0] == "" || args[1] == null || args[1] == ""
@@ -35,9 +29,9 @@ public class StreamingClient extends AbstractVerticle {
 			System.exit(0);
 		}
 
-		FILE_NAME = args[0];
-		FILE_TOPIC = args[1];
-		TRANS_MODE = args[2];
+		AgentConstant.FILE_NAME = args[0];
+		AgentConstant.FILE_TOPIC = args[1];
+		AgentConstant.TRANS_MODE = args[2];
 		Runner.runExample(StreamingClient.class);
 	}
 
@@ -51,29 +45,36 @@ public class StreamingClient extends AbstractVerticle {
 
 	public void handshake(HttpClient hc, FileSystem fs) {
 
-		HttpClientRequest request = hc.put(SERVER_PORT, SERVER_ADDR, "", resp -> {
+		HttpClientRequest request = hc.put(AgentConstant.SERVER_PORT, AgentConstant.SERVER_ADDR, "", resp -> {
 			System.out.println("Response: Hand Shake Status Code - " + resp.statusCode());
 			System.out.println("Response: Hand Shake Status Message - " + resp.statusMessage());
-			if (resp.statusCode() == RES_SUCCESS) {
+			if (resp.statusCode() == AgentConstant.RES_SUCCESS) {
  				System.out.println("Response: Hand Shake Status - SUCCESSFUL!");
  				streamfile(hc, fs);
  			}
  			else System.out.println("Response: Hand Shake Status - FAILED!");
 		});
-		    request.end(setMetaData(FILE_NAME));
+		request.headers().add("DF_PROTOCOL","REGISTER");
+		request.headers().add("DF_MODE", AgentConstant.TRANS_MODE);
+		request.headers().add("DF_TYPE", "META");
+		request.headers().add("DF_TOPIC", AgentConstant.META_TOPIC);
+		request.end(setMetaData(AgentConstant.FILE_NAME));
  	}
 
 	public void streamfile(HttpClient hc, FileSystem fs) {
 
-		HttpClientRequest request = hc.put(SERVER_PORT, SERVER_ADDR, "", resp -> {
+		HttpClientRequest request = hc.put(AgentConstant.SERVER_PORT, AgentConstant.SERVER_ADDR, "", resp -> {
 			System.out.println("Response: File Streaming Status Code - " + resp.statusCode());
 			System.out.println("Response: File Streaming Status Message - " + resp.statusMessage());
 		});
 
-		fs.props(FILE_NAME, ares -> {
+		fs.props(AgentConstant.FILE_NAME, ares -> {
 			FileProps props = ares.result();
 			request.headers().set("content-length", String.valueOf(props.size()));
-			fs.open(FILE_NAME, new OpenOptions(), ares2 -> {
+			request.headers().set("DF_MODE", AgentConstant.TRANS_MODE);
+			request.headers().set("DF_TYPE", "PAYLOAD");
+			request.headers().add("DF_TOPIC", AgentConstant.FILE_TOPIC);
+			fs.open(AgentConstant.FILE_NAME, new OpenOptions(), ares2 -> {
 				AsyncFile file = ares2.result();
 				Pump pump = Pump.pump(file, request);
 				file.endHandler(v -> {
@@ -84,21 +85,25 @@ public class StreamingClient extends AbstractVerticle {
 		});
 	}
 
-	public String setMetaData(String finlename) {
+	public String setMetaData(String fileName) {
 
-		String jsonstring = null;
+
+		MetaDataPOJO md = new MetaDataPOJO();
+		ObjectMapper mapperObj = new ObjectMapper();
+
 		try {
-			BasicFileAttributes attr = Files.readAttributes(Paths.get(finlename), BasicFileAttributes.class);
-			jsonstring = "{\"" + "file_length" + "\":\"" + String.valueOf(attr.size()) + "\"," +
-						 "\"" + "creation_date" + "\":\"" + String.valueOf(attr.creationTime()) + "\"," +
-						 "\"" + "file_name" + "\":\"" + FILE_NAME + "\"," +
-						 "\"" + "topic" + "\":\"" + META_TOPIC + "\"," +
-						 "\"" + "mode"+ "\":\"" + TRANS_MODE + "\"}";
-			System.out.println("INFO: Metadata Json String is - " + jsonstring);
-
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			BasicFileAttributes attr = Files.readAttributes(Paths.get(fileName), BasicFileAttributes.class);
+			md.setFileLength(attr.size());
+			md.setCreateDate(String.valueOf(attr.creationTime()));
+			md.setFileName(AgentConstant.FILE_NAME);
+			md.setTopic(AgentConstant.META_TOPIC);
+			md.setMode(AgentConstant.TRANS_MODE);
+			return mapperObj.writeValueAsString(md);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return jsonstring;
+
+		return null;
+
 	}
 }

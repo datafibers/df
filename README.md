@@ -21,7 +21,8 @@ It is a maven multi-module project. It contains following modules
 * Streaming files to Kafka - DONE
 * Streaming metadata to Kafka - DONE
 * Batching files to HDFS
-* File monitoring to process regular file load
+* Batching files to HIVE
+* Metadata Store
 * File watcher
 * Dashboard for metadata
 * Transformation framework

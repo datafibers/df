@@ -2,11 +2,14 @@ package io.example.vertx.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.example.kafka.producer.KafkaStreamProducer;
 import io.example.vertx.util.Runner;
+import io.example.vertx.util.ServerConstant;
+import io.example.vertx.util.ServerFunc;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -14,7 +17,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 
 public class StreamingServer extends AbstractVerticle {
-	
 
 	  public static void main(String[] args)
 	  {
@@ -23,11 +25,7 @@ public class StreamingServer extends AbstractVerticle {
 
 	  }
 
-      static String META_TOPIC = "metadata";
-      static String pattern1 = "{";
-	  static String pattern2 = "}";
-
-	  static Pattern p = Pattern.compile(Pattern.quote(pattern1) + "(.*?)" + Pattern.quote(pattern2));
+	  static Pattern p = Pattern.compile(Pattern.quote(ServerConstant.JSON_PATTERN_L) + "(.*?)" + Pattern.quote(ServerConstant.JSON_PATTERN_R));
 
 	  /* (non-Javadoc)
 	 * @see io.vertx.core.AbstractVerticle#start()
@@ -54,29 +52,55 @@ public class StreamingServer extends AbstractVerticle {
 					@Override
 					public void handle(Buffer buffer) 
 					{
-						//System.out.println("stream handler...");
 						byteswritten += buffer.length();
 						String inputString = extraBytes == null ? buffer.toString(): extraBytes + buffer.toString();
 						extraBytes = null;
 						//using string patterns
-						System.out.println("INFO: Message received from client - " + inputString);
+
+						//System.out.println("INFO: Message received from client - " + inputString);
+
 						Matcher m = p.matcher(inputString);
 						//set request content-length header
                         MultiMap headers = request.headers();
                         headers.set("content-length", String.valueOf(byteswritten));
+
+						ServerFunc.printToConsole("INFO", headers);
+
 						while (m.find()) {
 							if(start < 0){
 								if(m.start() > 0)
 									start = m.start();
 							}
 							try{
-								//adding message to Kafka topic
-								ksp.sendMessages("appA", m.group());
-                                System.out.println("INFO: Message sent to Kafka - " + m.group());
+								if(headers.get("DF_TYPE").equalsIgnoreCase(ServerConstant.DF_TYPE_MEATA)) {
+									ksp.sendMessages(ServerConstant.META_TOPIC, m.group());
+									ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
+								}
+								if(headers.get("DF_TYPE").equalsIgnoreCase(ServerConstant.DF_TYPE_PAYLOAD)) {
+
+									switch (headers.get("DF_MODE")) {
+										case ServerConstant.DF_MODE_STREAM_KAFKA:
+											ksp.sendMessages(headers.get("DF_TOPIC"), m.group());
+											ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
+											break;
+										case ServerConstant.DF_MODE_STREAM_HDFS:
+											ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
+											break;
+										case ServerConstant.DF_MODE_BATCH_HDFS:
+											ServerFunc.printToConsole("INFO", "Data => HDFS in batching");
+											break;
+										case ServerConstant.DF_MODE_BATCH_HIVE:
+											ServerFunc.printToConsole("INFO", "Data => HIVE in batching");
+											break;
+										default:
+											ServerFunc.printToConsole("INFO", "Data => NULL!");
+											break;
+									}
+								}
 
 							}catch(Exception ex){
 								ex.printStackTrace();
-								System.err.println("ERROR: Sending message to Kafka!!");
+								ServerFunc.printToConsole("ERROR", "Sending data exception!", Boolean.TRUE);
 							}
 							end = m.start() + m.group().length();
 						}//while
