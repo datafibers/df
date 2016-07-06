@@ -1,5 +1,6 @@
 package io.example.vertx.util;
 
+import io.example.conf.ConstantApp;
 import io.vertx.core.MultiMap;
 
 import java.util.Map;
@@ -19,7 +20,7 @@ public class ServerFunc {
     }
 
     public static void printToConsole(String msg_type, MultiMap mp) {
-        if(ServerConstant.DEBUG_MODE) {
+        if(ConstantApp.DEBUG_MODE) {
             for (Map.Entry entry : mp.entries()) {
                 System.out.println( msg_type + ": The MultiMap KEY:VALUE pairs for HEADER is: [" + entry.getKey() + ":" +
                         entry.getValue() +"]");
@@ -34,7 +35,7 @@ public class ServerFunc {
     }
 
     public static void printToConsole(String msg_type, String msg) {
-        if(ServerConstant.DEBUG_MODE) {
+        if(ConstantApp.DEBUG_MODE) {
             System.out.println(msg_type + ": " + msg);
         }
     }

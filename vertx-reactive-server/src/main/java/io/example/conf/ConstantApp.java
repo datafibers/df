@@ -1,6 +1,8 @@
-package io.example.vertx.util;
+package io.example.conf;
 
-public final class ServerConstant {
+public final class ConstantApp {
+
+    public static final String APP_PROPERTIES_FILE = "app.properties";
 
     public static final Boolean DEBUG_MODE = true;
     public static final String META_TOPIC = "metadata";

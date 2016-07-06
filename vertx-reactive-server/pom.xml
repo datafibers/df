@@ -6,7 +6,6 @@
     <artifactId>kappa-streaming</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-
   
   <artifactId>vertx-reactive-server</artifactId>
   
@@ -16,6 +15,9 @@
   	<vertx.version>3.2.1</vertx.version>
   	<jersey.version>2.22.1</jersey.version>
   	<jackson.version>1.9.13</jackson.version>
+    <kafka.version>1.9.13</kafka.version>
+    <guava.version>19.0</guava.version>
+    <hadoophdfs.version>2.6.4</hadoophdfs.version>
   </properties>
   
   <dependencies>
@@ -25,7 +27,6 @@
       <artifactId>vertx-core</artifactId>
       <version>${vertx.version}</version>
     </dependency>
-
 
     <dependency>
       <groupId>io.vertx</groupId>
@@ -55,7 +56,7 @@
       <dependency>
        <groupId>com.google.guava</groupId>
        <artifactId>guava</artifactId>
-       <version>19.0</version>
+       <version>${guava.version}</version>
    </dependency>
     
     <!-- jackson dependencies -->
@@ -69,6 +70,19 @@
         <artifactId>jackson-core-asl</artifactId>
         <version>${jackson.version}</version>
     </dependency>
+
+    <!-- Hadoop dependencies -->
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>${hadoophdfs.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoophdfs.version}</version>
+    </dependency>
+
   </dependencies>
   
     <build>
@@ -105,7 +119,7 @@
 		<executions>
 		  <execution>
 			<id>make-assembly</id>
-                                      <!-- bind to the packaging phase -->
+            <!-- bind to the packaging phase -->
 			<phase>package</phase> 
 			<goals>
 				<goal>single</goal>
@@ -116,5 +130,4 @@
       </plugins>
     
   </build>
-
 </project>

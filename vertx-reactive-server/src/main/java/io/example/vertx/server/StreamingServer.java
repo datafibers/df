@@ -2,13 +2,13 @@ package io.example.vertx.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.example.kafka.producer.KafkaStreamProducer;
+import io.example.conf.ConfigApp;
+import io.example.producers.KafkaStreamProducer;
 import io.example.vertx.util.Runner;
-import io.example.vertx.util.ServerConstant;
+import io.example.conf.ConstantApp;
 import io.example.vertx.util.ServerFunc;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -25,11 +25,11 @@ public class StreamingServer extends AbstractVerticle {
 
 	  }
 
-	  static Pattern p = Pattern.compile(Pattern.quote(ServerConstant.JSON_PATTERN_L) + "(.*?)" + Pattern.quote(ServerConstant.JSON_PATTERN_R));
+	  static Pattern p = Pattern.compile(Pattern.quote(ConstantApp.JSON_PATTERN_L) + "(.*?)" + Pattern.quote(ConstantApp.JSON_PATTERN_R));
 
 	  /* (non-Javadoc)
-	 * @see io.vertx.core.AbstractVerticle#start()
-	 */
+	   * @see io.vertx.core.AbstractVerticle#start()
+	   */
 	@Override
 	  public void start() throws Exception {
 		System.out.println("INFO: Server started at - localhost:8998");
@@ -72,24 +72,24 @@ public class StreamingServer extends AbstractVerticle {
 									start = m.start();
 							}
 							try{
-								if(headers.get("DF_TYPE").equalsIgnoreCase(ServerConstant.DF_TYPE_MEATA)) {
-									ksp.sendMessages(ServerConstant.META_TOPIC, m.group());
+								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_MEATA)) {
+									ksp.sendMessages(ConstantApp.META_TOPIC, m.group());
 									ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
 								}
-								if(headers.get("DF_TYPE").equalsIgnoreCase(ServerConstant.DF_TYPE_PAYLOAD)) {
+								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
 
 									switch (headers.get("DF_MODE")) {
-										case ServerConstant.DF_MODE_STREAM_KAFKA:
+										case ConstantApp.DF_MODE_STREAM_KAFKA:
 											ksp.sendMessages(headers.get("DF_TOPIC"), m.group());
 											ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
 											break;
-										case ServerConstant.DF_MODE_STREAM_HDFS:
+										case ConstantApp.DF_MODE_STREAM_HDFS:
 											ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
 											break;
-										case ServerConstant.DF_MODE_BATCH_HDFS:
+										case ConstantApp.DF_MODE_BATCH_HDFS:
 											ServerFunc.printToConsole("INFO", "Data => HDFS in batching");
 											break;
-										case ServerConstant.DF_MODE_BATCH_HIVE:
+										case ConstantApp.DF_MODE_BATCH_HIVE:
 											ServerFunc.printToConsole("INFO", "Data => HIVE in batching");
 											break;
 										default:
@@ -163,6 +163,6 @@ public class StreamingServer extends AbstractVerticle {
 					}//handle
 				});
 			}
-	    }).listen(8998);
+	    }).listen(ConfigApp.getServerPort());
 	  }
 }
