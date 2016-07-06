@@ -30,9 +30,11 @@ It is a maven multi-module project. It contains following modules
 * Query framework
 * Integrate Kanaba and Elastic
 * File ingestion and conversion, flat, xml, csv, mainframe
+* File header and trailer validation
 * Data replication across clusters, databases, tables, etc
 * Data policy supports, such as purging/retaining some rows for compliance reasons
 * Automatically register data with Hive
 * Data format interchange
 * Data deduplication and merge
 * Data job management and monitoring
+* Web UI
