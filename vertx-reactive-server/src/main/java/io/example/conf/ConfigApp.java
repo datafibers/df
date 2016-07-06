@@ -15,6 +15,7 @@ public class ConfigApp {
   // App configuration
   private static final String SERVER_PORT = "df.server.port";
   private static final String SERVER_TMP = "df.server.tmp.folder";
+  private static final String DEBUG_MODE = "df.server.debug.mode";
 
 
   public static Configuration getAppConfig() {
@@ -43,6 +44,10 @@ public class ConfigApp {
 
   public static String getServerTmp() {
     return getConfigurationParameterValue(getAppConfig(), SERVER_TMP);
+  }
+
+  public static Boolean getServerDebugMode() {
+    return Boolean.valueOf(getConfigurationParameterValue(getAppConfig(), DEBUG_MODE));
   }
 
 }

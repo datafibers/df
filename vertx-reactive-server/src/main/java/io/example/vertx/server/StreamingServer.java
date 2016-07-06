@@ -33,6 +33,8 @@ public class StreamingServer extends AbstractVerticle {
 	@Override
 	  public void start() throws Exception {
 		System.out.println("INFO: Server started at - localhost:8998");
+		System.out.println("INFO: Server debug mode - " + ConfigApp.getServerDebugMode().toString().toUpperCase());
+
 		vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
 	    	
 	    	long byteswritten = 0;
