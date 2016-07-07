@@ -18,5 +18,4 @@
 .iml
 dependency-reduced-pom.xml
 .DS_Store
-jobrunner_server.iml
 .vertx/
