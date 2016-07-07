@@ -6,9 +6,8 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-      <module>vertx-reactive-server</module>
-      <module>vertx-reactive-agent</module>
-      <module>flink-kafka-processor</module>
+      <module>df-reactive-server</module>
+      <module>df-reactive-agent</module>
   </modules>
   
    <build>

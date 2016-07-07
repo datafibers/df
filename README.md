@@ -1,23 +1,22 @@
 # DataFibers Smart GW
 
-###1.Overview
-DataFibers - DF is a Kappa Architecture implementation based on a immutable log appender model.
+##1.Overview
+DataFibers - DF is a open source big data smart gateway and data bus for enterprise big data project. It has implemented a generic architecture for both batch and real time processing.
 
-This project is using following technologies.
+This project is using or will use following technologies.
 
 * Vertx (Java 8)
 * Kafka (API, Connect, Stream)
 * HDFS API
-* Flink
+* Flink|Spark
 
 
 It is a maven multi-module project. It contains following modules
 
-* **vertx-reactive-client**: Reads a very large file and streams it to server
-* **vertx-reactive-server**: Non-blocking server, that reads stream of data from client, parses data and sends it to Kafka queue.
-* **flink-kafka-processor**: Uses streaming data processing framework Apache Flink to read data from Kafka and in this project it uses Cassandra DB to store the processed data.
+* **df-reactive-client**: Reads a very large file and streams it to server
+* **df-reactive-server**: Non-blocking server, that reads stream of data from client, parses data and sends it to Kafka queue.
 
-###2.TODO
+##2.TODO
 * Streaming files to Kafka - DONE
 * Streaming metadata to Kafka - DONE
 * Streaming files to HDFS - DONE
