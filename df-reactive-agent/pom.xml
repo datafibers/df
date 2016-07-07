@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>kappa-streaming</groupId>
-    <artifactId>kappa-streaming</artifactId>
+    <groupId>org.datafibers</groupId>
+    <artifactId>df-kappa</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>vertx-reactive-agent</artifactId>
+  <artifactId>df-reactive-agent</artifactId>
 
 
   <properties>

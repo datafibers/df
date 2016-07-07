@@ -26,4 +26,4 @@ The overall unregister client workflow is as follows
 
 
 ##Sample Usage
-java -jar vertx-reactive-server-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+java -jar df-reactive-server-0.0.1-SNAPSHOT-jar-with-dependencies.jar
