@@ -1,5 +1,5 @@
 # DataFibers Smart GW
-[![Gitter](https://badges.gitter.im/datafibers/df.svg)](https://gitter.im/datafibers/df?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Gitter](https://badges.gitter.im/datafibers/df.svg)](https://gitter.im/datafibers/df?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/datafibers/df.svg?branch=master)](https://travis-ci.org/datafibers/df)
 ##1.Overview
 DataFibers - DF is a open source big data smart gateway and data bus for enterprise big data project. It has implemented a generic architecture for both batch and real time processing.
 
