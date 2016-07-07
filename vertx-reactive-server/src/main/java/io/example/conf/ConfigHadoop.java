@@ -24,12 +24,14 @@ public class ConfigHadoop {
   private static final String YARN_SITE_XML_PATH_KEY = "hadoop.yarn.site.path";
 
   private static final String HDFS_SHARED_CONF_KEY = "hadoop.hdfs.shared.conf";
+
+  private static final String HDFS_SECURITY_ENABLED = "hadoop.security.enabled";
   private static final String HDFS_KEYTAB_FILE_KEY = "hadoop.hdfs.keytab.file";
   private static final String HDFS_KEYTAB_PRINCIPAL_KEY = "hadoop.hdfs.keytab.principal";
   private static final String HDFS_KEYTAB_HOSTNAME_KEY = "hadoop.hdfs.keytab.hostname";
 
-  private static final String NAMENODE_ADDRESS_KEY = "hadoop.dfs.nameservices";
-  private static final String YARN_RESOURCE_MANAGER_ADDRESS_KEY = "hadoop.yarn.resourcemanager.cluster-id";
+  private static final String NAMENODE_ADDRESS_KEY = "dfs.nameservices";
+  private static final String YARN_RESOURCE_MANAGER_ADDRESS_KEY = "yarn.resourcemanager.cluster-id";
 
 
 
@@ -43,6 +45,10 @@ public class ConfigHadoop {
 
   public static String getYarnSiteXmlPath() {
     return ConfigApp.getConfigurationParameterValue(ConfigApp.getAppConfig(), YARN_SITE_XML_PATH_KEY);
+  }
+
+  public static Boolean getHadoopSecurityEnabled() {
+    return Boolean.valueOf(ConfigApp.getConfigurationParameterValue(ConfigApp.getAppConfig(), HDFS_SECURITY_ENABLED));
   }
 
   public static String getHdfsKeyTabFileKey() {
@@ -104,28 +110,31 @@ public class ConfigHadoop {
       hadoopConf.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
       hadoopConf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
-      // This value will get set above in the getYarnSiteXml. For local machines, get the app conf
-      // value:
+      // This value will get set above in the getYarnSiteXml. For local machines, get from app.properties
       if (StringUtils.isEmpty(hadoopConf.get(getYarnResourceManagerAddressKey()))) {
         hadoopConf.set(getYarnResourceManagerAddressKey(), getLocalResourceManagerAddress());
         ServerFunc.printToConsole("WARN","Running local yarn resource manager.  This is only for non-clustered environment!");
       }
-      // This value will get set above in the getHdfsSiteXml. For local machines, get the app conf
-      // value:
+      // This value will get set above in the getHdfsSiteXml. For local machines, , get from app.properties
       if (StringUtils.isEmpty(hadoopConf.get(getNamenodeAddressKey()))) {
         hadoopConf.set(getNamenodeAddressKey(), getLocalNamenodeHdfsValue());
         ServerFunc.printToConsole("WARN","Running local name node manager.  This is only for non-clustered environment!");
       }
 
       // Security:
-      hadoopConf.set(getHdfsKeyTabFileKey(), getHdfsKeyTabFile());
-      hadoopConf.set(getHdfsKeyTabPrincipalKey(),getHdfsKeyTabPrincipal());
+      if(getHadoopSecurityEnabled()) {
+        hadoopConf.set(getHdfsKeyTabFileKey(), getHdfsKeyTabFile());
+        hadoopConf.set(getHdfsKeyTabPrincipalKey(),getHdfsKeyTabPrincipal());
+      }
 
       Iterator<Map.Entry<String, String>> iterator = hadoopConf.iterator();
       while (iterator.hasNext()) {
         Map.Entry<String, String> next = iterator.next();
         ServerFunc.printToConsole("INFO","HADOOP_CONF:" + next.getKey() + ":" + next.getValue());
       }
+
+      ServerFunc.printToConsole(hadoopConf.get("dfs.support.append") == null?"WARN":"INFO",
+              "HADOOP_CONF:dfs.support.append:" + hadoopConf.get("dfs.support.append"));
     }
 
     return hadoopConf;

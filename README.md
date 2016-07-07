@@ -20,6 +20,7 @@ It is a maven multi-module project. It contains following modules
 ###2.TODO
 * Streaming files to Kafka - DONE
 * Streaming metadata to Kafka - DONE
+* Streaming files to HDFS - DONE
 * Batching files to HDFS
 * Batching files to HIVE
 * Metadata Store

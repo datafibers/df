@@ -58,6 +58,7 @@ public class StreamingClient extends AbstractVerticle {
 		request.headers().add("DF_MODE", AgentConstant.TRANS_MODE);
 		request.headers().add("DF_TYPE", "META");
 		request.headers().add("DF_TOPIC", AgentConstant.META_TOPIC);
+		request.headers().add("DF_FILENAME", AgentConstant.FILE_NAME);
 		request.end(setMetaData(AgentConstant.FILE_NAME));
  	}
 
@@ -74,6 +75,7 @@ public class StreamingClient extends AbstractVerticle {
 			request.headers().set("DF_MODE", AgentConstant.TRANS_MODE);
 			request.headers().set("DF_TYPE", "PAYLOAD");
 			request.headers().add("DF_TOPIC", AgentConstant.FILE_TOPIC);
+			request.headers().add("DF_FILENAME", AgentConstant.FILE_NAME);
 			fs.open(AgentConstant.FILE_NAME, new OpenOptions(), ares2 -> {
 				AsyncFile file = ares2.result();
 				Pump pump = Pump.pump(file, request);

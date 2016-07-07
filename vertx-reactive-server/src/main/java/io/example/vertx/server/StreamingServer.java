@@ -1,11 +1,18 @@
 package io.example.vertx.server;
 
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.example.conf.ConfigApp;
+import io.example.producers.HDFSStreamProducer;
 import io.example.producers.KafkaStreamProducer;
 import io.example.vertx.util.Runner;
 import io.example.conf.ConstantApp;
@@ -14,7 +21,12 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.AsyncFile;
+import io.vertx.core.file.OpenOptions;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.streams.Pump;
+
+import static java.lang.System.out;
 
 public class StreamingServer extends AbstractVerticle {
 
@@ -30,17 +42,17 @@ public class StreamingServer extends AbstractVerticle {
 	  /* (non-Javadoc)
 	   * @see io.vertx.core.AbstractVerticle#start()
 	   */
-	@Override
+	  @Override
 	  public void start() throws Exception {
-		System.out.println("INFO: Server started at - localhost:8998");
-		System.out.println("INFO: Server debug mode - " + ConfigApp.getServerDebugMode().toString().toUpperCase());
+		out.println("INFO: Server started at - localhost:8998");
+		out.println("INFO: Server debug mode - " + ConfigApp.getServerDebugMode().toString().toUpperCase());
 
 		vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
 	    	
 	    	long byteswritten = 0;
 	    	
 			KafkaStreamProducer ksp = new KafkaStreamProducer();
-			
+
 			List<String> results = new ArrayList<String>();
 			String extraBytes = null;
 			
@@ -59,8 +71,6 @@ public class StreamingServer extends AbstractVerticle {
 						extraBytes = null;
 						//using string patterns
 
-						//System.out.println("INFO: Message received from client - " + inputString);
-
 						Matcher m = p.matcher(inputString);
 						//set request content-length header
                         MultiMap headers = request.headers();
@@ -74,10 +84,23 @@ public class StreamingServer extends AbstractVerticle {
 									start = m.start();
 							}
 							try{
+								//Process metadata and authentication later
 								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_MEATA)) {
 									ksp.sendMessages(ConstantApp.META_TOPIC, m.group());
 									ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
+									switch (headers.get("DF_MODE")) {
+										case ConstantApp.DF_MODE_STREAM_KAFKA:
+											break;
+										case ConstantApp.DF_MODE_STREAM_HDFS:
+											break;
+										case ConstantApp.DF_MODE_BATCH_HDFS:
+										case ConstantApp.DF_MODE_BATCH_HIVE:
+										default:
+											ServerFunc.printToConsole("INFO", "Meta Data => NULL!");
+											break;
+									}
 								}
+								//Process payload and its request
 								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
 
 									switch (headers.get("DF_MODE")) {
@@ -86,6 +109,7 @@ public class StreamingServer extends AbstractVerticle {
 											ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
 											break;
 										case ConstantApp.DF_MODE_STREAM_HDFS:
+											HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), m.group());
 											ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
 											break;
 										case ConstantApp.DF_MODE_BATCH_HDFS:
@@ -95,7 +119,7 @@ public class StreamingServer extends AbstractVerticle {
 											ServerFunc.printToConsole("INFO", "Data => HIVE in batching");
 											break;
 										default:
-											ServerFunc.printToConsole("INFO", "Data => NULL!");
+											ServerFunc.printToConsole("INFO", "Payload Data => NULL!");
 											break;
 									}
 								}
@@ -144,9 +168,24 @@ public class StreamingServer extends AbstractVerticle {
 				request.endHandler(new Handler<Void>() {
 					@Override
 					public void handle(Void event) {
-						System.out.println("INFO: request.endHandler is called");
+
+						ServerFunc.printToConsole("INFO", "Request endHandler is called");
+
 						try {
-							request.response().setStatusCode(202).setStatusMessage("bytes written " + byteswritten);
+							//handle specific request
+							switch(request.headers().get("DF_TYPE")) {
+								case ConstantApp.DF_TYPE_MEATA:
+									request.response().setStatusCode(202).setStatusMessage("Handshake OK");
+									break;
+								case ConstantApp.DF_TYPE_PAYLOAD:
+									HDFSStreamProducer.uploadToHDFS(request.headers().get("DF_FILENAME"));
+									request.response().setStatusCode(202).setStatusMessage("bytes written " + byteswritten);
+									break;
+								default:
+									ServerFunc.printToConsole("INFO", "Response Data => NULL!");
+									break;
+							}
+							//handle generic response
 							request.response().end();
 							extraBytes = null;
 							results = new ArrayList<String>();
@@ -157,6 +196,7 @@ public class StreamingServer extends AbstractVerticle {
 							e.printStackTrace();
 						}finally{
 							//ksp.closeProducer();
+							//hdfssp.closeProducer();
 							//reset
 							extraBytes = null;
 							results = new ArrayList<String>();
