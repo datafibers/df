@@ -26,8 +26,8 @@ public class HDFSStreamProducer {
             String hdfsDest = Paths.get(ConfigApp.getHDFSLandingPath(),
                     Paths.get(fileName).getParent().toString(), Paths.get(fileName).getFileName().toString()).toString();
 
-            ServerFunc.printToConsole("INFO","localSrc is " + localSrc);
-            ServerFunc.printToConsole("INFO","hdfsDest is " + hdfsDest);
+            ServerFunc.printToConsole("INFO","Upload local from " + localSrc + " to HDFS at "
+                    + ConfigHadoop.getDefaultFSAddress() + hdfsDest);
 
             FileFunc.moveFromLocalFile(fs, new Path(localSrc), new Path(hdfsDest));
             fs.close();
@@ -52,8 +52,7 @@ public class HDFSStreamProducer {
             if(!Files.exists(Paths.get(stagFile))) Files.createFile(Paths.get(stagFile));
             Files.write(Paths.get(getStageFile(fileName)),
                     message.getBytes(), StandardOpenOption.APPEND);
-            ServerFunc.printToConsole("INFO","Create|Append staging local file at" +
-                    ConfigApp.getServerTmp()+ Paths.get(fileName).getFileName());
+            ServerFunc.printToConsole("INFO","Appending local staging file @" + getStageFile(fileName));
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
