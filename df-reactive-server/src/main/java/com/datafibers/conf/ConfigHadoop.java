@@ -24,6 +24,7 @@ public class ConfigHadoop {
   private static final String YARN_SITE_XML_PATH_KEY = "hadoop.yarn.site.path";
 
   private static final String HDFS_SHARED_CONF_KEY = "hadoop.hdfs.shared.conf";
+  private static final String HDFS_DEFAULT_ADDRESS = "fs.defaultFS";
 
   private static final String HDFS_SECURITY_ENABLED = "hadoop.security.enabled";
   private static final String HDFS_KEYTAB_FILE_KEY = "hadoop.hdfs.keytab.file";
@@ -75,12 +76,10 @@ public class ConfigHadoop {
     return NAMENODE_ADDRESS_KEY;
   }
 
-  /**
-   * This will return address of the name node in format hdfs://namenodeaddress
-   */
-  public static String getNamenodeHdfsAddress() {
-    return "hdfs://" + getHadoopConfigurationParameterValue(getHadoopConfig(), NAMENODE_ADDRESS_KEY);
+  public static String getLocalResourceManagerAddress() {
+    return ConfigApp.getConfigurationParameterValue(ConfigApp.getAppConfig(), YARN_RESOURCE_MANAGER_ADDRESS_KEY);
   }
+
 
   public static String getLocalNamenodeHdfsValue() {
     return ConfigApp.getConfigurationParameterValue(ConfigApp.getAppConfig(), NAMENODE_ADDRESS_KEY);
@@ -90,12 +89,19 @@ public class ConfigHadoop {
     return YARN_RESOURCE_MANAGER_ADDRESS_KEY;
   }
 
+  /**
+   * This will return address of the name node in format hdfs://namenodeaddress
+   */
+  public static String getNamenodeHdfsAddress() {
+    return "hdfs://" + getHadoopConfigurationParameterValue(getHadoopConfig(), NAMENODE_ADDRESS_KEY);
+  }
+
   public static String getResourceManagerAddress() {
     return getHadoopConfigurationParameterValue(getHadoopConfig(), YARN_RESOURCE_MANAGER_ADDRESS_KEY);
   }
 
-  public static String getLocalResourceManagerAddress() {
-    return ConfigApp.getConfigurationParameterValue(ConfigApp.getAppConfig(), YARN_RESOURCE_MANAGER_ADDRESS_KEY);
+  public static String getDefaultFSAddress() {
+    return getHadoopConfigurationParameterValue(getHadoopConfig(), HDFS_DEFAULT_ADDRESS);
   }
 
   public static Configuration getHadoopConfig() {

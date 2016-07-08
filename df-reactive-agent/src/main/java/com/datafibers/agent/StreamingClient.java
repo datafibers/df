@@ -14,7 +14,9 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.streams.Pump;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -50,7 +52,7 @@ public class StreamingClient extends AbstractVerticle {
 			System.out.println("Response: Hand Shake Status Message - " + resp.statusMessage());
 			if (resp.statusCode() == AgentConstant.RES_SUCCESS) {
  				System.out.println("Response: Hand Shake Status - SUCCESSFUL!");
- 				streamfile(hc, fs);
+ 				streamFiles(hc, fs);
  			}
  			else System.out.println("Response: Hand Shake Status - FAILED!");
 		});
@@ -62,6 +64,8 @@ public class StreamingClient extends AbstractVerticle {
 		request.end(setMetaData(AgentConstant.FILE_NAME));
  	}
 
+	@Deprecated
+	//TODO: DELETE SOON
 	public void streamfile(HttpClient hc, FileSystem fs) {
 
 		HttpClientRequest request = hc.put(AgentConstant.SERVER_PORT, AgentConstant.SERVER_ADDR, "", resp -> {
@@ -108,4 +112,66 @@ public class StreamingClient extends AbstractVerticle {
 		return null;
 
 	}
+
+	public void streamFiles(HttpClient hc, FileSystem fs) {
+
+		Path directoryPath = Paths.get(AgentConstant.FILE_NAME);
+		//This is where to process all files in folder. One request is for each file.
+		if (Files.isDirectory(directoryPath)) {
+			System.out.println("INFO: This is directory processing");
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath)) {
+				for (Path path : stream) {
+					System.out.println("INFO: Process local file in dir@" + path.toString());
+					HttpClientRequest request = hc.put(AgentConstant.SERVER_PORT, AgentConstant.SERVER_ADDR, "", resp -> {
+						System.out.println("Response: File Streaming Status Code - " + resp.statusCode());
+						System.out.println("Response: File Streaming Status Message - " + resp.statusMessage());
+					});
+
+					fs.props(path.toString(), ares -> {
+						FileProps props = ares.result();
+						request.headers().set("content-length", String.valueOf(props.size()));
+						request.headers().set("DF_MODE", AgentConstant.TRANS_MODE);
+						request.headers().set("DF_TYPE", "PAYLOAD");
+						request.headers().add("DF_TOPIC", AgentConstant.FILE_TOPIC);
+						request.headers().add("DF_FILENAME", path.toString());
+						fs.open(path.toString(), new OpenOptions(), ares2 -> {
+							AsyncFile file = ares2.result();
+							Pump pump = Pump.pump(file, request);
+							file.endHandler(v -> {
+								request.end();
+							});
+							pump.start();
+						});
+					});
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		//this is to process single file
+		if(Files.isRegularFile(directoryPath)) {
+			System.out.println("INFO: This is single file processing");
+			HttpClientRequest request = hc.put(AgentConstant.SERVER_PORT, AgentConstant.SERVER_ADDR, "", resp -> {
+				System.out.println("Response: File Streaming Status Code - " + resp.statusCode());
+				System.out.println("Response: File Streaming Status Message - " + resp.statusMessage());
+			});
+				fs.props(directoryPath.toString(), ares -> {
+					FileProps props = ares.result();
+					request.headers().set("content-length", String.valueOf(props.size()));
+					request.headers().set("DF_MODE", AgentConstant.TRANS_MODE);
+					request.headers().set("DF_TYPE", "PAYLOAD");
+					request.headers().add("DF_TOPIC", AgentConstant.FILE_TOPIC);
+					request.headers().add("DF_FILENAME", AgentConstant.FILE_NAME);
+					fs.open(AgentConstant.FILE_NAME, new OpenOptions(), ares2 -> {
+						AsyncFile file = ares2.result();
+						Pump pump = Pump.pump(file, request);
+						file.endHandler(v -> {
+							request.end();
+						});
+						pump.start();
+					});
+				});
+			}
+		}
+
 }
