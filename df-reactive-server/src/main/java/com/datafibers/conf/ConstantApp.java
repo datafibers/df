@@ -22,4 +22,6 @@ public final class ConstantApp {
     public static final String JSON_PATTERN_L = "{";
     public static final String JSON_PATTERN_R = "}";
 
+    public enum MessageFilter {NONE, JSON}
+
 }

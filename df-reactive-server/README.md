@@ -12,6 +12,7 @@ The following HTTP headers are used as meta data
 * DF_MODE: [STREAM_KAFKA|STREAM_HDFS|BATCH_HDFS|BATCH_HIVE]
 * DF_TYPE: [META|PAYLOAD]
 * DF_TOPIC: [META_DATA|Parameters]
+* DF_FILTER: [NONE|JSON]
 
 The overall data processing workflow is as follows
 

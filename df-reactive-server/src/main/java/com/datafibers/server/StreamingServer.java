@@ -3,9 +3,8 @@ package com.datafibers.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.datafibers.conf.ConfigApp;
+import com.datafibers.util.MsgFilter;
 import com.datafibers.util.Runner;
 import com.datafibers.util.ServerFunc;
 import com.datafibers.producers.HDFSStreamProducer;
@@ -28,8 +27,6 @@ public class StreamingServer extends AbstractVerticle {
 
 	  }
 
-	  static Pattern p = Pattern.compile(Pattern.quote(ConstantApp.JSON_PATTERN_L) + "(.*?)" + Pattern.quote(ConstantApp.JSON_PATTERN_R));
-
 	  /* (non-Javadoc)
 	   * @see io.vertx.core.AbstractVerticle#start()
 	   */
@@ -49,78 +46,92 @@ public class StreamingServer extends AbstractVerticle {
 			
 	    	int start = -1;
 	    	int end = -1;
+			Matcher m = null;
 
 			@Override
 			public void handle(HttpServerRequest request) {
 				request.handler(new Handler<Buffer>(){
 
 					@Override
-					public void handle(Buffer buffer) 
+					public void handle(Buffer buffer)
 					{
 						byteswritten += buffer.length();
 						String inputString = extraBytes == null ? buffer.toString(): extraBytes + buffer.toString();
 						extraBytes = null;
-						//using string patterns
 
-						Matcher m = p.matcher(inputString);
 						//set request content-length header
                         MultiMap headers = request.headers();
                         headers.set("content-length", String.valueOf(byteswritten));
 
 						ServerFunc.printToConsole("INFO", headers);
 
-						while (m.find()) {
-							if(start < 0){
-								if(m.start() > 0)
-									start = m.start();
-							}
-							try{
-								//Process metadata and authentication later
-								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_MEATA)) {
-									ksp.sendMessages(ConstantApp.META_TOPIC, m.group());
-									ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
-									switch (headers.get("DF_MODE")) {
-										case ConstantApp.DF_MODE_STREAM_KAFKA:
-											break;
-										case ConstantApp.DF_MODE_STREAM_HDFS:
-											break;
-										case ConstantApp.DF_MODE_BATCH_HDFS:
-										case ConstantApp.DF_MODE_BATCH_HIVE:
-										default:
-											ServerFunc.printToConsole("INFO", "Meta Data => NULL!");
-											break;
-									}
-								}
-								//Process payload and its request
-								if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
+						/*
+						 * Process metadata and authentication later
+						 */
+						if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_MEATA)) {
+							try {
+								//send metadata to kafka
+								ksp.sendMessages(ConstantApp.META_TOPIC, inputString);
 
-									switch (headers.get("DF_MODE")) {
-										case ConstantApp.DF_MODE_STREAM_KAFKA:
-											ksp.sendMessages(headers.get("DF_TOPIC"), m.group());
-											ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
-											break;
-										case ConstantApp.DF_MODE_STREAM_HDFS:
-											HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), m.group());
-											ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
-											break;
-										case ConstantApp.DF_MODE_BATCH_HDFS:
-											ServerFunc.printToConsole("INFO", "Data => HDFS in batching");
-											break;
-										case ConstantApp.DF_MODE_BATCH_HIVE:
-											ServerFunc.printToConsole("INFO", "Data => HIVE in batching");
-											break;
-										default:
-											ServerFunc.printToConsole("INFO", "Payload Data => NULL!");
-											break;
-									}
+								//decide the message filter
+								m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
+
+								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
+								switch (headers.get("DF_MODE")) {
+									case ConstantApp.DF_MODE_STREAM_KAFKA:
+										break;
+									case ConstantApp.DF_MODE_STREAM_HDFS:
+										break;
+									case ConstantApp.DF_MODE_BATCH_HDFS:
+									case ConstantApp.DF_MODE_BATCH_HIVE:
+									default:
+										ServerFunc.printToConsole("INFO", "Meta Data => NULL!");
+										break;
 								}
 
-							}catch(Exception ex){
+							} catch (Exception ex) {
 								ex.printStackTrace();
-								ServerFunc.printToConsole("ERROR", "Sending data exception!", Boolean.TRUE);
+								ServerFunc.printToConsole("ERROR", "Sending metadata exception!", Boolean.TRUE);
 							}
-							end = m.start() + m.group().length();
-						}//while
+						} //end if for metadata processing
+
+						/*
+						 * Process payload and its request. While loop for message filters
+						 */
+						if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
+							while (m.find()) {
+								if (start < 0) {
+									if (m.start() > 0)
+										start = m.start();
+								}
+								try {
+										switch (headers.get("DF_MODE")) {
+											case ConstantApp.DF_MODE_STREAM_KAFKA:
+												ksp.sendMessages(headers.get("DF_TOPIC"), m.group());
+												ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
+												break;
+											case ConstantApp.DF_MODE_STREAM_HDFS:
+												HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), inputString);
+												ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
+												break;
+											case ConstantApp.DF_MODE_BATCH_HDFS:
+												ServerFunc.printToConsole("INFO", "Data => HDFS in batching");
+												break;
+											case ConstantApp.DF_MODE_BATCH_HIVE:
+												ServerFunc.printToConsole("INFO", "Data => HIVE in batching");
+												break;
+											default:
+												ServerFunc.printToConsole("INFO", "Payload Data => NULL!");
+												break;
+										}
+
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									ServerFunc.printToConsole("ERROR", "Sending data exception!", Boolean.TRUE);
+								}
+								end = m.start() + m.group().length();
+							}//while
+						} //end if for payload processing
 
 						if(end >= 0 && end < inputString.length()){
 							extraBytes = inputString.substring(end, inputString.length());
