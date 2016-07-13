@@ -3,6 +3,8 @@ package com.datafibers.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.datafibers.conf.ConfigApp;
 import com.datafibers.util.MsgFilter;
 import com.datafibers.util.Runner;
@@ -46,6 +48,7 @@ public class StreamingServer extends AbstractVerticle {
 			
 	    	int start = -1;
 	    	int end = -1;
+			Pattern p = null;
 			Matcher m = null;
 
 			@Override
@@ -73,10 +76,11 @@ public class StreamingServer extends AbstractVerticle {
 								//send metadata to kafka
 								ksp.sendMessages(ConstantApp.META_TOPIC, inputString);
 
-								//decide the message filter
-								m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
+								//decide the message filter pattern
+								//m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
+								p = MsgFilter.getPattern(headers.get("DF_FILTER"));
 
-								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + m.group());
+								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + inputString);
 								switch (headers.get("DF_MODE")) {
 									case ConstantApp.DF_MODE_STREAM_KAFKA:
 										break;
@@ -99,6 +103,8 @@ public class StreamingServer extends AbstractVerticle {
 						 * Process payload and its request. While loop for message filters
 						 */
 						if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
+
+							m = p.matcher(inputString);
 							while (m.find()) {
 								if (start < 0) {
 									if (m.start() > 0)
@@ -111,7 +117,7 @@ public class StreamingServer extends AbstractVerticle {
 												ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
 												break;
 											case ConstantApp.DF_MODE_STREAM_HDFS:
-												HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), inputString);
+												HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), m.group());
 												ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
 												break;
 											case ConstantApp.DF_MODE_BATCH_HDFS:
@@ -200,6 +206,7 @@ public class StreamingServer extends AbstractVerticle {
 							//ksp.closeProducer();
 							//hdfssp.closeProducer();
 							//reset
+
 							extraBytes = null;
 							results = new ArrayList<String>();
 							byteswritten = 0;
