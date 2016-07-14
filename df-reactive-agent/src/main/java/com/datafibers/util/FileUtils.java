@@ -30,7 +30,7 @@ public class FileUtils {
             public boolean accept(Path entry) throws IOException {
                 String fileName = entry.getFileName().toString();
                 return fileName != null
-                        && !fileName.startsWith(AgentConstant.IGNORE_FILES_PREFIX)
+                        && !fileName.startsWith(AgentConstant.IGNORE_FILES_POSTFIX)
                         && !fileName.endsWith(AgentConstant.PROCESSING_FILES_POSTFIX)
                         && !fileName.endsWith(AgentConstant.PROCESSED_FILES_POSTFIX);
             }
