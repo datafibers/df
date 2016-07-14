@@ -1,5 +1,21 @@
-.settings/
-.classpath
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+/target/
+
+.idea
+.settings
 .project
-target/
-.vertx
+.classpath
+.svn
+.iml
+dependency-reduced-pom.xml
+.DS_Store
+.vertx/
