@@ -114,8 +114,8 @@ public class FileUtils {
 
 
 
-    public static void main(String [] args)
-    {
+    public static void main(String [] args) {
+
         String relatvePath = getRelativePath(Paths.get("/home/vagrant/landing/cust_data/a.json").toString(), AgentConstant.LANDING_FOLDER);
         System.out.println("file path is " + Paths.get("/home/vagrant/landing/cust_data/a.json").toString());
         System.out.println("relatvePath is " + relatvePath);
