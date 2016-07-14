@@ -136,11 +136,11 @@ public class ConfigHadoop {
       Iterator<Map.Entry<String, String>> iterator = hadoopConf.iterator();
       while (iterator.hasNext()) {
         Map.Entry<String, String> next = iterator.next();
-        ServerFunc.printToConsole("INFO","HADOOP_CONF:" + next.getKey() + ":" + next.getValue());
+        ServerFunc.printToConsole("INFO","HADOOP_CONF:" + next.getKey() + ":" + next.getValue(), Boolean.FALSE);
       }
 
       ServerFunc.printToConsole(hadoopConf.get("dfs.support.append") == null?"WARN":"INFO",
-              "HADOOP_CONF:dfs.support.append:" + hadoopConf.get("dfs.support.append"));
+              "HADOOP_CONF:dfs.support.append:" + hadoopConf.get("dfs.support.append"), Boolean.FALSE);
     }
 
     return hadoopConf;
