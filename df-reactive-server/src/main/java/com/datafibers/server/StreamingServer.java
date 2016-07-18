@@ -179,14 +179,33 @@ public class StreamingServer extends AbstractVerticle {
 
 						ServerFunc.printToConsole("INFO", "Request endHandler is called");
 
+						//Clean up code
 						try {
-							//handle specific request
+
+							//post processing function
+							switch(request.headers().get("DF_MODE")) {
+
+								case ConstantApp.DF_MODE_STREAM_KAFKA:
+									break;
+								case ConstantApp.DF_MODE_STREAM_HDFS:
+									//Once streaming is done, upload the whole file to HDFS
+									HDFSStreamProducer.uploadToHDFS(request.headers().get("DF_FILENAME"));
+									break;
+								case ConstantApp.DF_MODE_BATCH_HDFS:
+									break;
+								case ConstantApp.DF_MODE_BATCH_HIVE:
+									break;
+								default:
+									ServerFunc.printToConsole("INFO", "Payload Data => NULL!");
+									break;
+							}
+
+							//post process feedback for specific request
 							switch(request.headers().get("DF_TYPE")) {
 								case ConstantApp.DF_TYPE_MEATA:
 									request.response().setStatusCode(202).setStatusMessage("Handshake OK");
 									break;
 								case ConstantApp.DF_TYPE_PAYLOAD:
-									HDFSStreamProducer.uploadToHDFS(request.headers().get("DF_FILENAME"));
 									request.response().setStatusCode(202).setStatusMessage("bytes written " + byteswritten);
 									break;
 								default:

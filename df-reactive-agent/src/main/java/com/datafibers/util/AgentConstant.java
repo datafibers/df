@@ -25,9 +25,9 @@ public class AgentConstant {
     public static String IGNORE_FILES_POSTFIX = ".ignore";
     public static String PROCESSING_FILES_POSTFIX = ".processing";
     public static String PROCESSED_FILES_POSTFIX = ".processed";
-    public static String FILE_FILTER_REGX = ".\\.(?!(js|exe" +
+    public static String FILE_FILTER_REGX = ".*\\.(?!(js|exe" +
             (IGNORE_FILES_POSTFIX + PROCESSING_FILES_POSTFIX + PROCESSED_FILES_POSTFIX).replace('.','|') +
-            ")$)([^.]+$)";
+            "|)$)([^.]+$)";
 
     //Vertx and other control parameters
     public static int COUNTER = 0;
