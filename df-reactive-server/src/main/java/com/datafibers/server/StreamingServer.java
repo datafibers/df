@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.datafibers.conf.ConfigApp;
+import com.datafibers.producers.MongoStreamProducer;
 import com.datafibers.util.MsgFilter;
 import com.datafibers.util.Runner;
 import com.datafibers.util.ServerFunc;
@@ -42,6 +43,7 @@ public class StreamingServer extends AbstractVerticle {
 	    	long byteswritten = 0;
 	    	
 			KafkaStreamProducer ksp = new KafkaStreamProducer();
+			MongoStreamProducer msp = new MongoStreamProducer(vertx);
 
 			List<String> results = new ArrayList<String>();
 			String extraBytes = null;
@@ -73,8 +75,12 @@ public class StreamingServer extends AbstractVerticle {
 						 */
 						if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_MEATA)) {
 							try {
-								//send metadata to kafka
-								ksp.sendMessages(ConstantApp.META_TOPIC, inputString);
+								//send metadata to kafka or mongodb or both
+								if (ConfigApp.getMetaEnabledKafka())
+									ksp.sendMessages(ConstantApp.META_TOPIC, inputString);
+								if (ConfigApp.getMetaEnabledMongodb())
+									msp.sendMessages(ConfigApp.getMetaMongodbName(), inputString);
+
 
 								//decide the message filter pattern
 								//m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
