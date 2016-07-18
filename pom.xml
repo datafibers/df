@@ -8,7 +8,6 @@
   <modules>
       <module>df-reactive-server</module>
       <module>df-reactive-agent</module>
-      <module>df-demo</module>
   </modules>
   
    <build>
