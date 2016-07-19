@@ -121,5 +121,9 @@
     <orderEntry type="library" name="Maven: com.jcraft:jsch:0.1.42" level="project" />
     <orderEntry type="library" name="Maven: org.apache.curator:curator-recipes:2.6.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:1.3.9" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-mongo-client:3.3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-async:3.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-core:3.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:bson:3.2.2" level="project" />
   </component>
 </module>

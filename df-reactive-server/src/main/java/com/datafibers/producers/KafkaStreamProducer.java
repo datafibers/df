@@ -6,6 +6,10 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
+/**
+ * This class is used to write/stream data, such as metadata, to kafka.
+ * One example of usage is to write metadata to kafka for real-time data discovery and management.
+ */
 
 public class KafkaStreamProducer {
 	

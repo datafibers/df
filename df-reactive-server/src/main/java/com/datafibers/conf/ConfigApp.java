@@ -17,6 +17,10 @@ public class ConfigApp {
   private static final String SERVER_TMP = "df.server.tmp.folder";
   private static final String DEBUG_MODE = "df.server.debug.mode";
   private static final String HDFS_LANDING_PATH = "df.server.hdfs.landing.path";
+  private static final String META_ENABLED_KAFKA = "df.meta.enabled.kafka";
+  private static final String META_ENABLED_MONGODB = "df.meta.enabled.mongodb";
+  private static final String META_MONGODB_CONFIG = "df.meta.mongodb.config";
+  private static final String META_MONGODB_NAME = "df.meta.mongodb.collection.name";
 
 
   public static Configuration getAppConfig() {
@@ -53,6 +57,22 @@ public class ConfigApp {
 
   public static String getHDFSLandingPath() {
     return getConfigurationParameterValue(getAppConfig(), HDFS_LANDING_PATH);
+  }
+
+  public static Boolean getMetaEnabledKafka() {
+      return Boolean.valueOf(getConfigurationParameterValue(getAppConfig(), META_ENABLED_KAFKA));
+  }
+
+  public static Boolean getMetaEnabledMongodb() {
+      return Boolean.valueOf(getConfigurationParameterValue(getAppConfig(), META_ENABLED_MONGODB));
+  }
+
+  public static String getMetaMongodbConfig() {
+      return getConfigurationParameterValue(getAppConfig(), META_MONGODB_CONFIG);
+  }
+
+  public static String getMetaMongodbName() {
+      return getConfigurationParameterValue(getAppConfig(), META_MONGODB_NAME);
   }
 
 }
