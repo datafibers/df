@@ -20,7 +20,7 @@ public class ConfigApp {
   private static final String META_ENABLED_KAFKA = "df.meta.enabled.kafka";
   private static final String META_ENABLED_MONGODB = "df.meta.enabled.mongodb";
   private static final String META_MONGODB_CONFIG = "df.meta.mongodb.config";
-  private static final String META_MONGODB_NAME = "df.meta.mongodb.name";
+  private static final String META_MONGODB_NAME = "df.meta.mongodb.collection.name";
 
 
   public static Configuration getAppConfig() {

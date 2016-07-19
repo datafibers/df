@@ -1,12 +1,14 @@
 package com.datafibers.producers;
 
+import com.datafibers.conf.ConfigApp;
 import com.datafibers.util.ServerFunc;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 
 /**
- * This class is used to write metadata to mongodb so that we have full history of meta data.
+ * This class is used to write/stream data, such as metadata, to mongodb.
+ * One example of usage is to write metadata to mongodb for now since we do not finalize meta schema yet.
  */
 public class MongoStreamProducer {
 
@@ -17,7 +19,11 @@ public class MongoStreamProducer {
     }
 
     public MongoStreamProducer (Vertx vertx) {
-        client = MongoClient.createShared(vertx, new JsonObject());
+        JsonObject jo = null;
+        if(ConfigApp.getMetaMongodbConfig() == null) {
+            jo = new JsonObject();
+        } else new JsonObject(ConfigApp.getMetaMongodbConfig());
+        client = MongoClient.createShared(vertx, jo);
     }
 
     public void sendMessages(String dbName, String message) {

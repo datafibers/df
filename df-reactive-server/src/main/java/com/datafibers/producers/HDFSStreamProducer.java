@@ -13,8 +13,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 /**
- * Producer used to sink streamed data to HDFS
+ * This class is used to write/stream data, such as metadata, to HDFS.
+ * One example of usage is to stream data to HDFS. Data will first stage in a temp file.
+ * Once the stream is complete, thw whole stage file will be uploaded to the HDFS.
  */
+
 public class HDFSStreamProducer {
 
     public static void uploadToHDFS(String fileName) {
