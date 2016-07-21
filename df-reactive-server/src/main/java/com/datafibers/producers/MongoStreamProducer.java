@@ -14,8 +14,8 @@ public class MongoStreamProducer {
 
     MongoClient client;
 
-    public MongoStreamProducer (Vertx vertx, JsonObject config) {
-        client = MongoClient.createShared(vertx, config);
+    public MongoStreamProducer (Vertx vertx, JsonObject config, Boolean enabled) {
+        if (enabled) client = MongoClient.createShared(vertx, config);
     }
 
     public MongoStreamProducer (Vertx vertx) {

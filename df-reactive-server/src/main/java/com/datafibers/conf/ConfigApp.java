@@ -1,5 +1,6 @@
 package com.datafibers.conf;
 
+import com.datafibers.util.ServerFunc;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.Configuration;
@@ -39,7 +40,8 @@ public class ConfigApp {
   public static String getConfigurationParameterValue(Configuration conf, String parameterKey) {
     String value = conf.getString(parameterKey);
     if (StringUtils.isEmpty(value))
-      throw new RuntimeException("Unable to determine value for " + parameterKey + ", found :" + value);
+      ServerFunc.printToConsole("WARN", "Unable to determine value for " + parameterKey + ", found :" + value);
+      //throw new RuntimeException("Unable to determine value for " + parameterKey + ", found :" + value);
     return value;
   }
 

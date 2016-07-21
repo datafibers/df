@@ -39,15 +39,15 @@ public class StreamingServer extends AbstractVerticle {
 		out.println("INFO: Server debug mode - " + ConfigApp.getServerDebugMode().toString().toUpperCase());
 
 		vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
-	    	
+
 	    	long byteswritten = 0;
-	    	
+
 			KafkaStreamProducer ksp = new KafkaStreamProducer();
 			MongoStreamProducer msp = new MongoStreamProducer(vertx);
 
 			List<String> results = new ArrayList<String>();
 			String extraBytes = null;
-			
+
 	    	int start = -1;
 	    	int end = -1;
 			Pattern p = null;
@@ -148,33 +148,6 @@ public class StreamingServer extends AbstractVerticle {
 						if(end >= 0 && end < inputString.length()){
 							extraBytes = inputString.substring(end, inputString.length());
 						}
-
-						/*---------------------jackson parser
-						try{
-								parser = jsonfactory.createJsonParser(buffer.toString());
-								JsonToken jt = null;
-								JsonToken intjt = null;
-								
-								while (parser.nextToken() != JsonToken.END_ARRAY) 
-								{
-									jt = parser.getCurrentToken();
-									if(jt == JsonToken.START_OBJECT){
-										while(parser.nextToken() != JsonToken.END_OBJECT){
-											intjt = parser.getCurrentToken();
-											if(intjt == JsonToken.FIELD_NAME){
-												System.out.println(":"+intjt.asString());
-											}
-										}
-									}
-								//	System.out.println("==> "+parser.nextToken());
-								//	System.out.println(parser.getCurrentName());
-
-								}
-
-						}catch(Exception ex){
-							ex.printStackTrace();
-						}
-						*///-------ends---jackson parser
 					}
 
 				});//request.handler
