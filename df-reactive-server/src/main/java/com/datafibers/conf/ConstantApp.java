@@ -15,6 +15,7 @@ public final class ConstantApp {
     public static final String DF_MODE_STREAM_HDFS = "STREAM_HDFS";
     public static final String DF_MODE_BATCH_HDFS = "BATCH_HDFS";
     public static final String DF_MODE_BATCH_HIVE = "BATCH_HIVE";
+    public static final String DF_MODE_KAFKA_CONNECT_JSON = "KAFKA_CONNECT_JSON";
 
     public static final String DF_TYPE_MEATA = "META";
     public static final String DF_TYPE_PAYLOAD = "PAYLOAD";
