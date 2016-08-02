@@ -18,7 +18,7 @@ public class KafkaStreamProducer {
 	public KafkaStreamProducer() {
 	
 		Properties properties = new Properties();
-	    properties.put("metadata.broker.list","localhost:9092");
+	    properties.put("metadata.broker.list","127.0.0.1:9092");
 	    properties.put("serializer.class","kafka.serializer.StringEncoder");
 	    ProducerConfig producerConfig = new ProducerConfig(properties);
 	    
@@ -29,7 +29,7 @@ public class KafkaStreamProducer {
 	public void sendMessages(String topic, String message) throws Exception
 	{
 		KeyedMessage<String, String> kmessage =new KeyedMessage<String, String>(topic, message);
-		producer.send(kmessage);
+		// producer.send(kmessage); // TODO: to uncomment after
 	}
 	
 	public void closeProducer(){
