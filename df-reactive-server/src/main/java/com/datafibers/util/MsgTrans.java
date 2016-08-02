@@ -28,7 +28,7 @@ public class MsgTrans {
     
     public static String dataTrans(String transCode, String inputString) {
     	switch (transCode) {
-	    	case "Y":
+	    	case "JRTKC":
 	    	    inputString = JSONReformatToKAFKAConnect(inputString);
 	    	    break;
 	    	default:

@@ -35,7 +35,7 @@ public class StreamingClient extends AbstractVerticle {
 		if (null == args[0] || args[0] == "" || args[1] == null || args[1] == ""
 				|| null == args[2] || args[2] == "" || args[2] == null || args[2] == "") {
 			System.err.println("Usage: javac io.vertx.example.http.client.StreamingClient " +
-					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b> <FILTER_TYPE >");
+					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b> <FILTER_TYPE> <TRANS_TYPE>");
 			System.exit(0);
 		}
 
