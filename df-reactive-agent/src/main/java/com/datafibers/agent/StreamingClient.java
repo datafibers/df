@@ -35,13 +35,22 @@ public class StreamingClient extends AbstractVerticle {
 		if (null == args[0] || args[0] == "" || args[1] == null || args[1] == ""
 				|| null == args[2] || args[2] == "" || args[2] == null || args[2] == "") {
 			System.err.println("Usage: javac io.vertx.example.http.client.StreamingClient " +
-					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b>");
+					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b> <FILTER_TYPE> <TRANS_TYPE>");
 			System.exit(0);
 		}
 
 		AgentConstant.FILE_NAME = args[0];
 		AgentConstant.FILE_TOPIC = args[1];
 		AgentConstant.TRANS_MODE = args[2];
+		
+		if (args.length > 3) {
+			AgentConstant.FILTER_TYPE = args[3];
+		}
+		
+		if (args.length > 4) {
+			AgentConstant.DATA_TRANS = args[4];
+		}
+		
 		Runner.runExample(StreamingClient.class);
 	}
 
@@ -72,6 +81,9 @@ public class StreamingClient extends AbstractVerticle {
 		request.headers().add("DF_TYPE", "META");
 		request.headers().add("DF_TOPIC", AgentConstant.META_TOPIC);
 		request.headers().add("DF_FILENAME", AgentConstant.FILE_NAME);
+		request.headers().add("DF_FILTER_TYPE", AgentConstant.FILTER_TYPE);
+		request.headers().add("DF_DATA_TRANS", AgentConstant.DATA_TRANS);
+		
 		request.end(setMetaData(AgentConstant.FILE_NAME));
  	}
 
@@ -88,6 +100,7 @@ public class StreamingClient extends AbstractVerticle {
 			md.setFileName(AgentConstant.FILE_NAME);
 			md.setTopic(AgentConstant.META_TOPIC);
 			md.setMode(AgentConstant.TRANS_MODE);
+			
 			return mapperObj.writeValueAsString(md);
 		} catch (IOException e) {
 			e.printStackTrace();

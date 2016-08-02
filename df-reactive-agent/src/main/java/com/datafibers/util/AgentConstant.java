@@ -15,6 +15,8 @@ public class AgentConstant {
     public static String FILE_TOPIC = null;
     public static String META_TOPIC = "META_DATA"; //use default value for marking handshake
     public static String TRANS_MODE = null;
+    public static String FILTER_TYPE = null;
+    public static String DATA_TRANS = null;
 
     //File processing folder setting - not used right now since we pick up directly from file folder parsed from CML
     public static String PROCESSING_FOLDER = "/home/vagrant/processing/";

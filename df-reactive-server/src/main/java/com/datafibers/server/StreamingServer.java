@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import com.datafibers.conf.ConfigApp;
 import com.datafibers.producers.MongoStreamProducer;
-import com.datafibers.util.MsgFilter;
+import com.datafibers.util.MsgTrans;
 import com.datafibers.util.Runner;
 import com.datafibers.util.ServerFunc;
 import com.datafibers.producers.HDFSStreamProducer;
@@ -52,7 +52,9 @@ public class StreamingServer extends AbstractVerticle {
 	    	int end = -1;
 			Pattern p = null;
 			Matcher m = null;
-
+			String msg = null;
+			String transCode = null;
+			
 			@Override
 			public void handle(HttpServerRequest request) {
 				request.handler(new Handler<Buffer>(){
@@ -84,7 +86,9 @@ public class StreamingServer extends AbstractVerticle {
 
 								//decide the message filter pattern
 								//m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
-								p = MsgFilter.getPattern(headers.get("DF_FILTER"));
+								p = MsgTrans.getPattern(headers.get("DF_FILTER"), inputString);
+								transCode = headers.get("DF_DATA_TRANS");
+								
 
 								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + inputString);
 								switch (headers.get("DF_MODE")) {
@@ -116,14 +120,21 @@ public class StreamingServer extends AbstractVerticle {
 									if (m.start() > 0)
 										start = m.start();
 								}
+								
+								System.out.println("headers: " + headers);
+								
+								msg = MsgTrans.dataTrans(transCode, m.group());
+								System.out.println("headers.get(DF_MODE): " + headers.get("DF_MODE"));
+								
 								try {
 										switch (headers.get("DF_MODE")) {
 											case ConstantApp.DF_MODE_STREAM_KAFKA:
-												ksp.sendMessages(headers.get("DF_TOPIC"), m.group());
-												ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
+											    ksp.sendMessages(headers.get("DF_TOPIC"), msg);
+											    ServerFunc.printToConsole("INFO", "Data => KAFKA in streaming");
+												
 												break;
 											case ConstantApp.DF_MODE_STREAM_HDFS:
-												HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), m.group());
+												HDFSStreamProducer.sendMessages(headers.get("DF_FILENAME"), msg);
 												ServerFunc.printToConsole("INFO", "Data => HDFS in streaming");
 												break;
 											case ConstantApp.DF_MODE_BATCH_HDFS:
@@ -135,13 +146,14 @@ public class StreamingServer extends AbstractVerticle {
 											default:
 												ServerFunc.printToConsole("INFO", "Payload Data => NULL!");
 												break;
-										}
+										} 
 
 								} catch (Exception ex) {
 									ex.printStackTrace();
 									ServerFunc.printToConsole("ERROR", "Sending data exception!", Boolean.TRUE);
 								}
-								end = m.start() + m.group().length();
+								
+								end = m.start() + msg.length();
 							}//while
 						} //end if for payload processing
 
@@ -214,4 +226,5 @@ public class StreamingServer extends AbstractVerticle {
 			}
 	    }).listen(ConfigApp.getServerPort());
 	  }
+	  
 }
