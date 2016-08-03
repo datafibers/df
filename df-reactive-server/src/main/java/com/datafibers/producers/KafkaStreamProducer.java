@@ -29,7 +29,7 @@ public class KafkaStreamProducer {
 	public void sendMessages(String topic, String message) throws Exception
 	{
 		KeyedMessage<String, String> kmessage =new KeyedMessage<String, String>(topic, message);
-		// producer.send(kmessage); // TODO: to uncomment after
+		producer.send(kmessage); // TODO: to uncomment after
 	}
 	
 	public void closeProducer(){

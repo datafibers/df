@@ -22,7 +22,7 @@ public class MsgTrans {
             case "JSON_KAFKA":  
             	
             default:
-                return Pattern.compile(".+");
+                return Pattern.compile(".+"); //TODO default should be \n match. Need to change here
         }
     }
     

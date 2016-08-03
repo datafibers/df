@@ -62,9 +62,7 @@ public class StreamingServer extends AbstractVerticle {
 					@Override
 					public void handle(Buffer buffer)
 					{
-						byteswritten += buffer.length();
-						String inputString = extraBytes == null ? buffer.toString(): extraBytes + buffer.toString();
-						extraBytes = null;
+						String inputMetaString = buffer.toString();
 
 						//set request content-length header
                         MultiMap headers = request.headers();
@@ -79,18 +77,17 @@ public class StreamingServer extends AbstractVerticle {
 							try {
 								//send metadata to kafka or mongodb or both
 								if (ConfigApp.getMetaEnabledKafka())
-									ksp.sendMessages(ConstantApp.META_TOPIC, inputString);
+									ksp.sendMessages(ConstantApp.META_TOPIC, inputMetaString);
 								if (ConfigApp.getMetaEnabledMongodb())
-									msp.sendMessages(ConfigApp.getMetaMongodbName(), inputString);
+									msp.sendMessages(ConfigApp.getMetaMongodbName(), inputMetaString);
 
 
 								//decide the message filter pattern
-								//m = MsgFilter.getPattern(headers.get("DF_FILTER")).matcher(inputString);
-								p = MsgTrans.getPattern(headers.get("DF_FILTER"), inputString);
+								p = MsgTrans.getPattern(headers.get("DF_FILTER"), inputMetaString);
 								transCode = headers.get("DF_DATA_TRANS");
 								
 
-								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + inputString);
+								ServerFunc.printToConsole("INFO", "Metadata => KAFKA @" + inputMetaString);
 								switch (headers.get("DF_MODE")) {
 									case ConstantApp.DF_MODE_STREAM_KAFKA:
 										break;
@@ -114,6 +111,10 @@ public class StreamingServer extends AbstractVerticle {
 						 */
 						if(headers.get("DF_TYPE").equalsIgnoreCase(ConstantApp.DF_TYPE_PAYLOAD)) {
 
+							byteswritten += buffer.length();
+							String inputString = extraBytes == null ? buffer.toString(): extraBytes + buffer.toString();
+							extraBytes = null;
+
 							m = p.matcher(inputString);
 							while (m.find()) {
 								if (start < 0) {
@@ -124,7 +125,6 @@ public class StreamingServer extends AbstractVerticle {
 								System.out.println("headers: " + headers);
 								
 								msg = MsgTrans.dataTrans(transCode, m.group());
-								System.out.println("headers.get(DF_MODE): " + headers.get("DF_MODE"));
 								
 								try {
 										switch (headers.get("DF_MODE")) {
@@ -153,13 +153,16 @@ public class StreamingServer extends AbstractVerticle {
 									ServerFunc.printToConsole("ERROR", "Sending data exception!", Boolean.TRUE);
 								}
 								
-								end = m.start() + msg.length();
+								end = m.start() + m.group().length();
 							}//while
-						} //end if for payload processing
 
-						if(end >= 0 && end < inputString.length()){
-							extraBytes = inputString.substring(end, inputString.length());
-						}
+
+							if(end >= 0 && end < inputString.length()){
+								extraBytes = inputString.substring(end, inputString.length());
+								ServerFunc.printToConsole("INFO", "extraBytes = " + extraBytes);
+							}
+
+						} //end if for payload processing
 					}
 
 				});//request.handler
@@ -198,6 +201,7 @@ public class StreamingServer extends AbstractVerticle {
 									break;
 								case ConstantApp.DF_TYPE_PAYLOAD:
 									request.response().setStatusCode(202).setStatusMessage("bytes written " + byteswritten);
+									request.response().setStatusCode(202).setStatusMessage("bytes from " + request.headers().get("DF_FILENAME"));
 									break;
 								default:
 									ServerFunc.printToConsole("INFO", "Response Data => NULL!");

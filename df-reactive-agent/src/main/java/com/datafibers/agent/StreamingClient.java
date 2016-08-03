@@ -17,6 +17,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.streams.Pump;
+import sun.management.Agent;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -35,7 +36,7 @@ public class StreamingClient extends AbstractVerticle {
 		if (null == args[0] || args[0] == "" || args[1] == null || args[1] == ""
 				|| null == args[2] || args[2] == "" || args[2] == null || args[2] == "") {
 			System.err.println("Usage: javac io.vertx.example.http.client.StreamingClient " +
-					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b> <FILTER_TYPE> <TRANS_TYPE>");
+					"<PATH_TO_INPUT_FILE_WITH_FILE_NAME> <FILE_TOPIC> <TRANS_MODE:-s|-b> <FILTER_TYPE> <TRANS_TYPE> <KEEP_PROCESSED_FILE>");
 			System.exit(0);
 		}
 
@@ -50,7 +51,12 @@ public class StreamingClient extends AbstractVerticle {
 		if (args.length > 4) {
 			AgentConstant.DATA_TRANS = args[4];
 		}
-		
+
+		if (args.length > 5) {
+			AgentConstant.FILE_REMOVE_PROCESSED = Boolean.FALSE;
+		}
+
+
 		Runner.runExample(StreamingClient.class);
 	}
 
@@ -81,7 +87,7 @@ public class StreamingClient extends AbstractVerticle {
 		request.headers().add("DF_TYPE", "META");
 		request.headers().add("DF_TOPIC", AgentConstant.META_TOPIC);
 		request.headers().add("DF_FILENAME", AgentConstant.FILE_NAME);
-		request.headers().add("DF_FILTER_TYPE", AgentConstant.FILTER_TYPE);
+		request.headers().add("DF_FILTER", AgentConstant.FILTER_TYPE);
 		request.headers().add("DF_DATA_TRANS", AgentConstant.DATA_TRANS);
 		
 		request.end(setMetaData(AgentConstant.FILE_NAME));
@@ -127,6 +133,9 @@ public class StreamingClient extends AbstractVerticle {
 					if (asyncResult.failed()) {
 						asyncResult.cause();
 					} else {
+
+						System.out.println("Scan folder at: " + AgentConstant.COUNTER ++);
+
 						for (String processingFile : asyncResult.result()) {
 							//Rename files before processing
 							try {
@@ -141,9 +150,17 @@ public class StreamingClient extends AbstractVerticle {
 								System.out.println("Response: File Streaming Status Message - " + resp.statusMessage());
 
 								try {
-									Files.move(Paths.get(processingFile.toString() + AgentConstant.PROCESSING_FILES_POSTFIX),
-											Paths.get(processingFile.toString() + AgentConstant.PROCESSED_FILES_POSTFIX),
-											REPLACE_EXISTING);
+
+									if(AgentConstant.FILE_REMOVE_PROCESSED) {
+
+										Files.deleteIfExists(Paths.get(processingFile.toString() + AgentConstant.PROCESSING_FILES_POSTFIX));
+
+									} else {
+
+										Files.move(Paths.get(processingFile.toString() + AgentConstant.PROCESSING_FILES_POSTFIX),
+												Paths.get(processingFile.toString() + AgentConstant.PROCESSED_FILES_POSTFIX),
+												REPLACE_EXISTING);
+									}
 
 								} catch (IOException ioe) {
 									ioe.printStackTrace();
@@ -180,7 +197,7 @@ public class StreamingClient extends AbstractVerticle {
 
 	/**
 	 * This is applied to single file processing only. The daemon will process the specified single file.
-	 * Once the files are processed (streamed), the file is archived to the archive folder
+	 * Once the files are processed (streamed), the file is archived to the archived
 	 * @param hc
 	 * @param fs
 	 */

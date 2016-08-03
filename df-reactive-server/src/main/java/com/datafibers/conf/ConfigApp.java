@@ -22,6 +22,7 @@ public class ConfigApp {
   private static final String META_ENABLED_MONGODB = "df.meta.enabled.mongodb";
   private static final String META_MONGODB_CONFIG = "df.meta.mongodb.config";
   private static final String META_MONGODB_NAME = "df.meta.mongodb.collection.name";
+  private static final String FILE_REMOVE_PROCESSED = "df.file.remove.processed";
 
 
   public static Configuration getAppConfig() {
@@ -75,6 +76,10 @@ public class ConfigApp {
 
   public static String getMetaMongodbName() {
       return getConfigurationParameterValue(getAppConfig(), META_MONGODB_NAME);
+  }
+
+  public static Boolean getRemoveProcessed() {
+    return Boolean.valueOf(getConfigurationParameterValue(getAppConfig(), FILE_REMOVE_PROCESSED));
   }
 
 }

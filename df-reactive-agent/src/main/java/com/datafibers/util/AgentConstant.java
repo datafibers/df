@@ -33,7 +33,10 @@ public class AgentConstant {
 
     //Vertx and other control parameters
     public static int COUNTER = 0;
-    public static int FILE_WATCHER_PERIODIC = 5000; //1000 is 1 second
+    public static int FILE_WATCHER_PERIODIC = 30000; //1000 is 1 second
+
+    //File Process Settings
+    public static boolean FILE_REMOVE_PROCESSED = true;
 
 
 }
