@@ -181,6 +181,7 @@ public class StreamingClient extends AbstractVerticle {
 													Pump pump = Pump.pump(file, request);
 													file.endHandler(v -> {
 														request.end();
+														file.close();
 													});
 													pump.start();
 												});
@@ -238,6 +239,7 @@ public class StreamingClient extends AbstractVerticle {
 								Pump pump = Pump.pump(file, request);
 								file.endHandler(v -> {
 									request.end();
+									file.close();
 								});
 								pump.start();
 							});
